@@ -233,6 +233,21 @@ scaling=1.
 
 rawfo = open(DATADIR+'/data_'+file_datetime+'.dat', 'w')
 rawfo.write(str(command('I5001'))+'\n')
+rawfo.write(str(command('I5002'))+'\n')
+rawfo.write(str(command('I5003'))+'\n')
+rawfo.write(str(command('I5004'))+'\n')
+rawfo.write(str(command('I5005'))+'\n')
+rawfo.write(str(command('I5006'))+'\n')
+rawfo.write(str(command('I5007'))+'\n')
+rawfo.write(str(command('I5008'))+'\n')
+rawfo.write(str(command('I5009'))+'\n')
+rawfo.write(str(command('I5010'))+'\n')
+rawfo.write(str(command('I5011'))+'\n')
+rawfo.write(str(command('I5012'))+'\n')
+rawfo.write(str(command('I5013'))+'\n')
+rawfo.write(str(command('I5014'))+'\n')
+rawfo.write(str(command('I5015'))+'\n')
+rawfo.write(str(command('I5016'))+'\n')
 
 i = 0
 iw = 0
@@ -244,7 +259,7 @@ while True:
         mfo.write('found end of data\n')
         break
 
-    rawfo.write(' '.join(values))
+    rawfo.write(' '.join(values) + ' ')
 
     for v in values:
         if iw % nrecord < 4:
