@@ -192,7 +192,7 @@ command('I5006=$800D0B')
 command('I5007=$800D8B')
 command('I5008=$800E0B')
 
-# Linear encoders from motors 29-32
+# Rotary encoders from motors 29-32
 command('I5009=$800E8B')
 command('I5010=$800F0B')
 command('I5011=$800F8B')
