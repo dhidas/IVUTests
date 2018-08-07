@@ -37,8 +37,8 @@ sfo = open(DATADIR + '/ASummary_{}.html'.format(file_datetime), 'w')
 sfo.write('<html><body>\n')
 sfo.write('<h1>'+file_datetime+'</h1><br><br>\n')
 
-aout = PV('SR:C5-ID:G1{IVU21:1}Asyn.AOUT')
-ainp = PV('SR:C5-ID:G1{IVU21:1}Asyn.AINP')
+aout = PV('SR:C5-ID:G1{IVU21:1}.AOUT')
+ainp = PV('SR:C5-ID:G1{IVU21:1}.AINP')
 gap_set = PV('SR:C5-ID:G1{IVU21:1-Mtr:2}Inp:Pos')
 start = PV('SR:C5-ID:G1{IVU21:1-Mtr:2}Sw:Go.PROC')
 
@@ -202,7 +202,7 @@ command('I5012=$80100B')
 command('I5013=$07800A')
 command('I5014=$078012')
 command('I5015=$07801A')
-command('I5016=$078022')
+command('I5016=$078102')
 
 
 command('I5049={}'.format(int(gather_period)))
