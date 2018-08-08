@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import os
-from analysis_15 import *
+from analysis_28v2 import *
 
 device = sys.argv[1]
 new_gap = float(sys.argv[2])
@@ -25,15 +25,15 @@ elif device == 'LIX':
 
 comm_lock = threading.Lock()
 
-nsamples = 3000
-sample_time = 50.
+nsamples = 20
+sample_time = 5.
 nrecord = 16
 
 file_datetime = datetime.datetime.now().strftime('%Y%m%d.%H%M%S')
 print('file identifier:', file_datetime)
 
 # Create any directories needed
-BASEDIR = 'Tests_1.5m_20180807/'+device
+BASEDIR = 'Tests_2.8m_20180807/'+device
 DATADIR = BASEDIR + '/tests'
 PLOTDIR = BASEDIR + '/tests/plots/' + file_datetime
 os.makedirs(PLOTDIR)
@@ -47,8 +47,8 @@ sfo = open(DATADIR + '/ASummary_{}.html'.format(file_datetime), 'w')
 sfo.write('<html><body>\n')
 sfo.write('<h1>'+file_datetime+'</h1><br><br>\n')
 
-aout = PV(pvid+'}.AOUT')
-ainp = PV(pvid+'}.AINP')
+aout = PV(pvid+'}Asyn.AOUT')
+ainp = PV(pvid+'}Asyn.AINP')
 gap_set = PV(pvid+'-Mtr:2}Inp:Pos')
 start = PV(pvid+'-Mtr:2}Sw:Go.PROC')
 
@@ -156,10 +156,10 @@ labels = [
     'USL DAC',
 ]
 names = [
-    '2P3R',
-    '2M3R',
-    '4P5R',
-    '4M5R',
+    '1P2R',
+    '1M2R',
+    '3P4R',
+    '3M4R',
     'DSUL',
     'USUL',
     'DSLL',
@@ -176,10 +176,10 @@ names = [
 
 
 # Setup the fake motors for watching the rotary encoders
-command('I2903=$3502')
-command('I3003=$3503')
-command('I3103=$3504')
-command('I3203=$3505')
+command('I2903=$3501')
+command('I3003=$3502')
+command('I3103=$3503')
+command('I3203=$3504')
 command('I2900=1')
 command('I3000=1')
 command('I3100=1')
@@ -191,20 +191,20 @@ command('I5000=1')
 
 
 # Motor 2-5 act position (twos-compliment 48-bit)
-command('I5001=$80010B')
-command('I5002=$80018B')
-command('I5003=$80020B')
-command('I5004=$80028B')
+command('I5001=$80008B')
+command('I5002=$80010B')
+command('I5003=$80018B')
+command('I5004=$80020B')
 
 # Linear encoders from motors 22-25
-command('I5005=$078B24')
-command('I5006=$078B25')
-command('I5007=$078B28')
-command('I5008=$078B29')
-command('I5009=$078B2C')
-command('I5010=$078B2D')
-command('I5011=$078B30')
-command('I5012=$078B31')
+command('I5005=$078B20')
+command('I5006=$078B21')
+command('I5007=$078B24')
+command('I5008=$078B25')
+command('I5009=$078B28')
+command('I5010=$078B29')
+command('I5011=$078B2C')
+command('I5012=$078B2D')
 
 
 # Rotary encoders from motors 29-32
@@ -214,10 +214,10 @@ command('I5015=$800F8B')
 command('I5016=$80100B')
 
 # DAC output of motors 2-5 (y-registers)
-command('I5017=$07800A')
-command('I5018=$078012')
-command('I5019=$07801A')
-command('I5020=$078102')
+command('I5017=$078002')
+command('I5018=$07800A')
+command('I5019=$078012')
+command('I5020=$07801A')
 
 
 command('I5049={}'.format(int(gather_period)))
