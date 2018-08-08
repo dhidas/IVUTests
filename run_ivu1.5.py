@@ -25,8 +25,8 @@ elif device == 'FMX':
 
 comm_lock = threading.Lock()
 
-nsamples = 500
-sample_time = 4.
+nsamples = 3000
+sample_time = 50.
 nrecord = 16
 
 file_datetime = datetime.datetime.now().strftime('%Y%m%d.%H%M%S')
@@ -270,6 +270,10 @@ rawfo.write(str(command('I5020'))+'\n')
 
 i = 0
 iw = 0
+t = []
+this_time = 0
+good_linears = True
+temp_result = []
 time_download_start = time.time()
 while True:
     values = command('LIST GATHER {}, 3'.format(i)).split()
@@ -280,8 +284,6 @@ while True:
 
     rawfo.write(' '.join(values) + ' ')
 
-    good_linears = True
-    temp_result = []
     for v in values:
         if iw % nrecord < 4:
             temp_result.append(twos_complement(v) / 32. / 96.)
@@ -299,13 +301,20 @@ while True:
             temp_result.append(single16_word_int(v[6:10]))
             temp_result.append(single16_word_int(v[0:4]))
             iw += 2
+        if iw % nrecord == 0 and i != 0:
+            if good_linears:
+                result = result + temp_result
+                t.append(this_time)
+            else:
+                good_linears = True
+            temp_result = []
         i += 1
-    if good_linears:
-        result = result + temp_result
+    this_time += sample_period
 
 print('download time:', time.time() - time_download_start, '[s]')
 mfo.write('download time: ' + str(time.time() - time_download_start) + ' [s]')
 
+print('res:',result)
 command('DELETE GATHER')
 # Remove fake motors
 command('I2900,4,100=0')
@@ -316,8 +325,7 @@ r = []
 for i in range(nrecord):
     r.append( [ x for x in result[i::nrecord] ])
 
-t = np.linspace(0, sample_period * len(r[0]), len(r[0]))
-
+print('lens2', len(t), len(result)/nrecord)
 time_write_start = time.time()
 TXTDATAFILENAME = DATADIR+'/data_'+file_datetime+'.txt'
 with open(TXTDATAFILENAME, 'w') as fo:
@@ -355,6 +363,7 @@ os.rename(BASEDIR+'/index.tmp', BASEDIR+'/index.html')
 plt.figure()
 plt.title('Linear Encoders')
 for i in range(4, 8):
+    print('lens', len(t), len(r[i]))
     plt.plot(t, r[i], label=labels[i])
     plt.xlabel('Time [s]')
     plt.ylabel('Position [cts]')
