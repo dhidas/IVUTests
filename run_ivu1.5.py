@@ -25,8 +25,8 @@ elif device == 'FMX':
 
 comm_lock = threading.Lock()
 
-nsamples = 3000
-sample_time = 50.
+nsamples = 400
+sample_time = 5.
 nrecord = 16
 
 file_datetime = datetime.datetime.now().strftime('%Y%m%d.%H%M%S')
@@ -187,7 +187,7 @@ command('I3200=1')
 
 
 
-command('I5000=1')
+command('I5000=0')
 
 
 # Motor 2-5 act position (twos-compliment 48-bit)
