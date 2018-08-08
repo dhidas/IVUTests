@@ -186,8 +186,8 @@ command('I3100=1')
 command('I3200=1')
 
 
-
-command('I5000=1')
+# Setup buffer location to RAM and no wrap-around
+command('I5000=0')
 
 
 # Motor 2-5 act position (twos-compliment 48-bit)
