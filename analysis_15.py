@@ -164,6 +164,7 @@ def make_plots_one_file (filename, time=[-1, 1e99], odir = '.'):
     plt.xlabel(fields[0])
     plt.ylabel('DS - US [$\mu$m]')
     plt.title('ID16: ' + os.path.basename(filename))
+    plt.ylim([-20, 20])
     plt.tight_layout()
     plt.savefig(outprefix+'_4.png')
     plt.savefig(outprefix+'_4.pdf')

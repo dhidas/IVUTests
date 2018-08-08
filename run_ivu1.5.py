@@ -11,8 +11,17 @@ import sys
 import os
 from analysis_15 import *
 
-new_gap = float(sys.argv[1])
+device = sys.argv[1]
+new_gap = float(sys.argv[2])
 
+if device != 'SRX' and device != 'AMX' and device != 'FMX':
+    raise ValueError('first argument must be SRX AMX or FMX')
+
+pvid = 'SR:C5-ID:G1{IVU21:1'
+if device == 'AMX':
+    pvid = 'SR:C17-ID:G1{IVU21:1'
+elif device == 'FMX':
+    pvid = 'SR:C17-ID:G1{IVU21:2'
 
 comm_lock = threading.Lock()
 
@@ -24,7 +33,7 @@ file_datetime = datetime.datetime.now().strftime('%Y%m%d.%H%M%S')
 print('file identifier:', file_datetime)
 
 # Create any directories needed
-BASEDIR = 'Tests_1.5m_20180807/SRX'
+BASEDIR = 'Tests_1.5m_20180807/'+device
 DATADIR = BASEDIR + '/tests'
 PLOTDIR = BASEDIR + '/tests/plots/' + file_datetime
 os.makedirs(PLOTDIR)
@@ -38,10 +47,10 @@ sfo = open(DATADIR + '/ASummary_{}.html'.format(file_datetime), 'w')
 sfo.write('<html><body>\n')
 sfo.write('<h1>'+file_datetime+'</h1><br><br>\n')
 
-aout = PV('SR:C5-ID:G1{IVU21:1}.AOUT')
-ainp = PV('SR:C5-ID:G1{IVU21:1}.AINP')
-gap_set = PV('SR:C5-ID:G1{IVU21:1-Mtr:2}Inp:Pos')
-start = PV('SR:C5-ID:G1{IVU21:1-Mtr:2}Sw:Go.PROC')
+aout = PV(pvid+'}.AOUT')
+ainp = PV(pvid+'}.AINP')
+gap_set = PV(pvid+'-Mtr:2}Inp:Pos')
+start = PV(pvid+'-Mtr:2}Sw:Go.PROC')
 
 def command (request):
     with comm_lock:
@@ -98,20 +107,20 @@ mfo.write('total_time ' + str(total_time) + '\n')
 
 
 # Print current gap for info
-starting_gap = caget('SR:C5-ID:G1{IVU21:1-LEnc}Gap')
+starting_gap = caget(pvid+'-LEnc}Gap')
 print('starting gap:', starting_gap)
 
 # Linear encoder values and offsets
 lenc_offset = []
-lenc_offset.append(float(caget('SR:C5-ID:G1{IVU21:1-LEnc:2}Offset:RB')))
-lenc_offset.append(float(caget('SR:C5-ID:G1{IVU21:1-LEnc:3}Offset:RB')))
-lenc_offset.append(float(caget('SR:C5-ID:G1{IVU21:1-LEnc:4}Offset:RB')))
-lenc_offset.append(float(caget('SR:C5-ID:G1{IVU21:1-LEnc:5}Offset:RB')))
+lenc_offset.append(float(caget(pvid+'-LEnc:2}Offset:RB')))
+lenc_offset.append(float(caget(pvid+'-LEnc:3}Offset:RB')))
+lenc_offset.append(float(caget(pvid+'-LEnc:4}Offset:RB')))
+lenc_offset.append(float(caget(pvid+'-LEnc:5}Offset:RB')))
 lenc = []
-lenc.append(float(caget('SR:C5-ID:G1{IVU21:1-LEnc:2}Pos')))
-lenc.append(float(caget('SR:C5-ID:G1{IVU21:1-LEnc:3}Pos')))
-lenc.append(float(caget('SR:C5-ID:G1{IVU21:1-LEnc:4}Pos')))
-lenc.append(float(caget('SR:C5-ID:G1{IVU21:1-LEnc:5}Pos')))
+lenc.append(float(caget(pvid+'-LEnc:2}Pos')))
+lenc.append(float(caget(pvid+'-LEnc:3}Pos')))
+lenc.append(float(caget(pvid+'-LEnc:4}Pos')))
+lenc.append(float(caget(pvid+'-LEnc:5}Pos')))
 print('lenc        ', lenc)
 print('lenc offset ', lenc_offset)
 print('actual (cts)', [(y-x) for x,y in zip(lenc, lenc_offset)])
@@ -321,7 +330,7 @@ mfo.write('file write time: ' + str(time.time() - time_write_start) + ' [s]' + '
 
 
 
-ending_gap = caget('SR:C5-ID:G1{IVU21:1-LEnc}Gap')
+ending_gap = caget(pvid+'-LEnc}Gap')
 sfo.write('<h3>starting gap:' + str(starting_gap) + '</h3>\n')
 sfo.write('<h3>ending gap:  ' + str(ending_gap) + '</h3>\n')
 mfo.write('starting gap:' + str(starting_gap) + '\n')
@@ -331,7 +340,7 @@ with open(BASEDIR+'/index.html') as ifi:
     with open(BASEDIR+'/index.tmp', 'w') as tmpfo:
         for l in ifi:
             tmpfo.write(l)
-        tmpfo.write('<tr><td><a href="tests/Ana_{0}.html">{0}</a></td><td>'.format(file_datetime)+str(starting_gap)+'</td><td><a href="tests/ASummary_{0}.html">{0}</a></td><td>'.format(file_datetime)+str(starting_gap)+'</td><td>'+str(ending_gap)+'</td><td><a href="tests/data_{0}.txt">data_{0}.txt</a></td><td><a href="tests/metadata_{0}.txt">metadata_{0}.txt</a></td></tr>\n'.format(file_datetime))
+        tmpfo.write('<tr><td><a href="tests/Ana_{0}.html">{0}</a></td>'.format(file_datetime)+'<td><a href="tests/ASummary_{0}.html">{0}</a></td><td>'.format(file_datetime)+str(starting_gap)+'</td><td>'+str(ending_gap)+'</td><td><a href="tests/data_{0}.txt">data_{0}.txt</a></td><td><a href="tests/metadata_{0}.txt">metadata_{0}.txt</a></td></tr>\n'.format(file_datetime))
 
 
 os.rename(BASEDIR+'/index.html', BASEDIR+'/index.bak')
