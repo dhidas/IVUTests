@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import os
+from analysis_15 import *
 
 new_gap = float(sys.argv[1])
 
@@ -16,7 +17,7 @@ new_gap = float(sys.argv[1])
 comm_lock = threading.Lock()
 
 nsamples = 20
-sample_time = 5.
+sample_time = 4.
 nrecord = 16
 
 file_datetime = datetime.datetime.now().strftime('%Y%m%d.%H%M%S')
@@ -62,10 +63,9 @@ def convert_48bit_hex2float (v):
     return calc
 
 
-def twos_complement(input_value):
+def twos_complement(input_value, num_bits=48):
     '''Calculates a two's complement integer from the given input value's bits'''
     value = int(input_value, 16)
-    num_bits = 48
     mask = 2**(num_bits - 1)
     return -(value & mask) + (value & ~mask)
 
@@ -80,6 +80,7 @@ def single16_word_int (v):
     if value_low >= 65536/2:
         value_low = value_low - 65536
     return value_low
+
 
 
 # Servo interrupt time (need for gather period)
@@ -187,26 +188,31 @@ command('I5003=$80020B')
 command('I5004=$80028B')
 
 # Linear encoders from motors 22-25
-command('I5005=$800B0B')
-command('I5006=$800B8B')
-command('I5007=$800C0B')
-command('I5008=$800C8B')
+command('I5005=$078B24')
+command('I5006=$078B25')
+command('I5007=$078B28')
+command('I5008=$078B29')
+command('I5009=$078B2C')
+command('I5010=$078B2D')
+command('I5011=$078B30')
+command('I5012=$078B31')
+
 
 # Rotary encoders from motors 29-32
-command('I5009=$800E8B')
-command('I5010=$800F0B')
-command('I5011=$800F8B')
-command('I5012=$80100B')
+command('I5013=$800E8B')
+command('I5014=$800F0B')
+command('I5015=$800F8B')
+command('I5016=$80100B')
 
 # DAC output of motors 2-5 (y-registers)
-command('I5013=$07800A')
-command('I5014=$078012')
-command('I5015=$07801A')
-command('I5016=$078102')
+command('I5017=$07800A')
+command('I5018=$078012')
+command('I5019=$07801A')
+command('I5020=$078102')
 
 
 command('I5049={}'.format(int(gather_period)))
-command('I5050=$ffff')
+command('I5050=$fffff')
 command('I5051=$0')
 command('END GATHER')
 command('DELETE GATHER')
@@ -248,6 +254,10 @@ rawfo.write(str(command('I5013'))+'\n')
 rawfo.write(str(command('I5014'))+'\n')
 rawfo.write(str(command('I5015'))+'\n')
 rawfo.write(str(command('I5016'))+'\n')
+rawfo.write(str(command('I5017'))+'\n')
+rawfo.write(str(command('I5018'))+'\n')
+rawfo.write(str(command('I5019'))+'\n')
+rawfo.write(str(command('I5020'))+'\n')
 
 i = 0
 iw = 0
@@ -261,9 +271,13 @@ while True:
 
     rawfo.write(' '.join(values) + ' ')
 
+    good_linears = True
     for v in values:
         if iw % nrecord < 4:
             result.append(twos_complement(v) / 32. / 96.)
+            iw += 1
+        elif iw % nrecord < 8:
+            result.append((lenc_offset[(iw%nrecord) -4] - int(v[4:], 16)))
             iw += 1
         elif iw % nrecord < 12:
             result.append(twos_complement(v) / 32.)
@@ -289,7 +303,8 @@ for i in range(nrecord):
 t = np.linspace(0, sample_period * len(r[0]), len(r[0]))
 
 time_write_start = time.time()
-with open(DATADIR+'/data_'+file_datetime+'.txt', 'w') as fo:
+TXTDATAFILENAME = DATADIR+'/data_'+file_datetime+'.txt'
+with open(TXTDATAFILENAME, 'w') as fo:
     fo.write('Time (s)\t' + '\t'.join(labels))
     fo.write('\n')
     for i in range(len(result)):
@@ -316,7 +331,7 @@ with open(BASEDIR+'/index.html') as ifi:
     with open(BASEDIR+'/index.tmp', 'w') as tmpfo:
         for l in ifi:
             tmpfo.write(l)
-        tmpfo.write('<tr><td><a href="tests/ASummary_{0}.html">{0}</a></td><td>'.format(file_datetime)+str(starting_gap)+'</td><td>'+str(ending_gap)+'</td><td><a href="tests/data_{0}.txt">data_{0}.txt</a></td><td><a href="tests/metadata_{0}.txt">metadata_{0}.txt</a></td></tr>\n'.format(file_datetime))
+        tmpfo.write('<tr><td><a href="tests/Ana_{0}.html">{0}</a></td><td>'.format(file_datetime)+str(starting_gap)+'</td><td><a href="tests/ASummary_{0}.html">{0}</a></td><td>'.format(file_datetime)+str(starting_gap)+'</td><td>'+str(ending_gap)+'</td><td><a href="tests/data_{0}.txt">data_{0}.txt</a></td><td><a href="tests/metadata_{0}.txt">metadata_{0}.txt</a></td></tr>\n'.format(file_datetime))
 
 
 os.rename(BASEDIR+'/index.html', BASEDIR+'/index.bak')
@@ -370,3 +385,8 @@ sfo.write('<pre>\n')
 sfo.write(mfo.read())
 sfo.write('</pre>\n')
 sfo.write('</body></html>')
+
+
+
+
+runme(TXTDATAFILENAME)
