@@ -25,7 +25,7 @@ elif device == 'FMX':
 
 comm_lock = threading.Lock()
 
-nsamples = 20
+nsamples = 500
 sample_time = 4.
 nrecord = 16
 
@@ -281,21 +281,28 @@ while True:
     rawfo.write(' '.join(values) + ' ')
 
     good_linears = True
+    temp_result = []
     for v in values:
         if iw % nrecord < 4:
-            result.append(twos_complement(v) / 32. / 96.)
+            temp_result.append(twos_complement(v) / 32. / 96.)
             iw += 1
         elif iw % nrecord < 8:
-            result.append((lenc_offset[(iw%nrecord) -4] - int(v[4:], 16)))
+            temp_result.append((lenc_offset[(iw%nrecord) -4] - int(v[4:], 16)))
+            if int(v[3], 16) != 0x0:
+                print(format(int(v[0:4], 16), '#018b'), (lenc_offset[(iw%nrecord) -4] - int(v[4:], 16)))
+                good_linears = False
             iw += 1
         elif iw % nrecord < 12:
-            result.append(twos_complement(v) / 32.)
+            temp_result.append(twos_complement(v) / 32.)
             iw += 1
         else:
-            result.append(single16_word_int(v[6:10]))
-            result.append(single16_word_int(v[0:4]))
+            temp_result.append(single16_word_int(v[6:10]))
+            temp_result.append(single16_word_int(v[0:4]))
             iw += 2
         i += 1
+    if good_linears:
+        result = result + temp_result
+
 print('download time:', time.time() - time_download_start, '[s]')
 mfo.write('download time: ' + str(time.time() - time_download_start) + ' [s]')
 
