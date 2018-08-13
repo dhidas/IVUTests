@@ -30,6 +30,7 @@ def read_file (filename, linear_offset = [0, 0, 0, 0], rotary_offset=[0, 0, 0, 0
     Parse a list gat file from pmac test runs
     """
 
+    print('linear_offset:', linear_offset)
 
     # Data list for all processed data
     dall = []
@@ -118,11 +119,12 @@ def read_file (filename, linear_offset = [0, 0, 0, 0], rotary_offset=[0, 0, 0, 0
         RotaryDSL = (RotaryDSL_raw - zero_RotaryDSL)*scale_rotary + zero_LinearDSL
         RotaryUSL = (RotaryUSL_raw - zero_RotaryUSL)*scale_rotary + zero_LinearUSL
 
+
         if False:
-                print( [-zero_LinearDSU / scale_rotary - RotaryDSU_raw,
-                        -zero_LinearUSU / scale_rotary - RotaryUSU_raw,
-                        -zero_LinearDSL / scale_rotary - RotaryDSL_raw,
-                        -zero_LinearUSL / scale_rotary - RotaryUSL_raw] )
+                print( [-zero_LinearDSU / scale_rotary + RotaryDSU_raw,
+                        -zero_LinearUSU / scale_rotary + RotaryUSU_raw,
+                        -zero_LinearDSL / scale_rotary + RotaryDSL_raw,
+                        -zero_LinearUSL / scale_rotary + RotaryUSL_raw] )
                 exit(0)
 
         # Correct rotary numbers (local offset)
@@ -375,17 +377,17 @@ def get_scale_rotary (device):
 def get_rotary_offset (device):
 
     if device == 'SRX':
-        return [-584354515.292969, -584192861.1121218, -534472359.2940676, -533965155.5241091]
+        return [-2395854835.2929688, -2395919453.1121216, -2445716487.2940674, -2446270659.524109]
     elif device == 'AMX':
-        return [-1036613636.9007571, -1037263784.7803957, -1037235118.7344973, -1037767839.5010378]
+        return [-1943103140.900757, -1942963208.7803957, -1942980430.7344973, -1942898559.5010378]
     elif device == 'FMX':
         return [-835464624.0891726, -835239329.4262698, -835678154.3574221, -835625395.7142947]
     elif device == 'SMI':
-        return [0, 0, 0, 0]
+        return [-1997446816.9587402, -1997467701.461914, -1997683801.2573242, -1997643883.451416]
     elif device == 'ISR':
-        return [0, 0, 0, 0]
+        return [-2249166527.413574, -2249186875.5561523, -2249079324.890381, -2249071331.5612793]
     elif device == 'LIX':
-        return [0, 0, 0, 0]
+        return [-588114327.2414551, -588116289.8979492, -588090331.3095703, -587886454.1208496]
         
     return
 
@@ -410,6 +412,8 @@ htmlfo.write(f"""
              """)
 
 for run in runs:
+    #if run != '20180808.144858':
+    #    continue
 
     print(run)
 
