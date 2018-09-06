@@ -15,11 +15,12 @@ device = sys.argv[1]
 new_gap = float(sys.argv[2])
 
 
-nsamples = 20
-sample_time = 5.
+nsamples = 2000
+sample_time = 25.
 nrecord = 10
 
 
+comm_lock = threading.Lock()
 
 def command (request):
     with comm_lock:
@@ -36,9 +37,13 @@ print('file identifier:', file_datetime)
 
 # Create any directories needed
 BASEDIR = 'Tests_3.0m/' + device
-os.makedirs(BASEDIR, exist_ok=True)
+#os.makedirs(BASEDIR)
 
-rawfo = open(BASEDIR + '/data_' + file_datetime + '.dat')
+rawfo = open(BASEDIR + '/data_' + file_datetime + '.dat', 'w')
+
+
+asynpv = 'SR:C11-ID:G1{IVU20:1}Asyn'
+pvid = 'SR:C11-ID:G1{IVU20:1'
 
 aout = PV('SR:C04-ID:G1{IVU:1}Asyn.AOUT')
 ainp = PV('SR:C04-ID:G1{IVU:1}Asyn.AINP')
@@ -74,13 +79,14 @@ lenc_offset.append(float(caget(pvid+'-LEnc:4}Offset:RB')))
 lenc = []
 lenc.append(float(caget(pvid+'-LEnc:1}Pos')))
 lenc.append(float(caget(pvid+'-LEnc:2}Pos')))
-lenc.append(float(caget(pvid+'-LEnc:1}Pos')))
-lenc.append(float(caget(pvid+'-LEnc:2}Pos')))
+lenc.append(float(caget(pvid+'-LEnc:3}Pos')))
+lenc.append(float(caget(pvid+'-LEnc:4}Pos')))
 print('lenc        ', lenc)
 print('lenc offset ', lenc_offset)
 print('actual (cts)', [(y-x) for x,y in zip(lenc, lenc_offset)])
 print('actual  (mm)', [(y-x)/1.e6 for x,y in zip(lenc, lenc_offset)])
-rawfo.write(str(lenc_offset) + '\n')
+for off in lenc_offset:
+    rawfo.write(str(off) + '\n')
 
 
 
@@ -168,7 +174,6 @@ command('END GATHER')
 
 
 
-rawfo = open(DATADIR+'/data_'+file_datetime+'.dat', 'w')
 rawfo.write(str(command('I5001'))+'\n')
 rawfo.write(str(command('I5002'))+'\n')
 rawfo.write(str(command('I5003'))+'\n')
